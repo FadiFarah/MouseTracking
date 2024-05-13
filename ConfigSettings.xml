@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ConfigSettings>
+	<MoveX>0</MoveX>
+	<MoveY>0</MoveY>
+	<FromSize>20</FromSize>
+	<ToSize>50</ToSize>
+	<DurationSeconds>0.25</DurationSeconds>
+	<DefaultColor>Red</DefaultColor>
+	<LMBClickColor>Green</LMBClickColor>
+	<RMBClickColor>Yellow</RMBClickColor>
+</ConfigSettings>
