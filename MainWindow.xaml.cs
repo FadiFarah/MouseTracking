@@ -15,11 +15,14 @@ namespace MouseTracking
     {
         private readonly ConfigSettings _settings;
         private Point _lastMousePosition;
+        DoubleAnimation animation = new DoubleAnimation();
+
         public MainWindow()
         {
-            _lastMousePosition = new Point();
             InitializeComponent();
+            _lastMousePosition = new Point();
             _settings = ConfigLoader.LoadConfigSettings("ConfigSettings.xml");
+            appCircle.Fill = _settings.DefaultColor;
             appCircle.Width = _settings.FromSize;
             appCircle.Height = _settings.FromSize;
             // Initialize the timer for periodic updates
@@ -32,11 +35,11 @@ namespace MouseTracking
             MouseHook.Start();
             MouseHook.MouseMove += OnGlobalMouseMove;
             MouseHook.MouseClickAction += InteractiveEllipse_MouseDown;
+            animation.Completed += RevertCircleSizeAndColor;
         }
 
         private void InteractiveEllipse_MouseDown(object sender, MouseClickEventArgs e)
         {
-            DoubleAnimation animation = new DoubleAnimation();
 
             switch (e.Action)
             {
@@ -56,19 +59,8 @@ namespace MouseTracking
                     appCircle.BeginAnimation(Ellipse.HeightProperty, animation);
                     break;
                 case MouseAction.LMBUp:
-                    appCircle.Fill = _settings.DefaultColor;
+                    
 
-                    // Create and start a motion animation for the ellipse
-                    animation.From = _settings.FromSize;  // Initial size
-                    animation.To = _settings.FromSize;    // Target size
-                    animation.Duration = new Duration(TimeSpan.FromSeconds(_settings.Duration));  // Animation duration
-
-                    // Set the center point for scaling (optional)
-                    appCircle.RenderTransformOrigin = new Point(0.5, 0.5);
-
-                    // Apply the animation to the Width and Height properties of the ellipse
-                    appCircle.BeginAnimation(Ellipse.WidthProperty, animation);
-                    appCircle.BeginAnimation(Ellipse.HeightProperty, animation);
                     break;
                 case MouseAction.RMBDown:
                     appCircle.Fill = _settings.RMBClickColor;
@@ -86,26 +78,34 @@ namespace MouseTracking
                     appCircle.BeginAnimation(Ellipse.HeightProperty, animation);
                     break;
                 case MouseAction.RMBUp:
-                    appCircle.Fill = _settings.DefaultColor;
-
-                    // Create and start a motion animation for the ellipse
-                    animation.From = _settings.FromSize;  // Initial size
-                    animation.To = _settings.FromSize;    // Target size
-                    animation.Duration = new Duration(TimeSpan.FromSeconds(_settings.Duration));  // Animation duration
-
-                    // Set the center point for scaling (optional)
-                    appCircle.RenderTransformOrigin = new Point(0.5, 0.5);
-
-                    // Apply the animation to the Width and Height properties of the ellipse
-                    appCircle.BeginAnimation(Ellipse.WidthProperty, animation);
-                    appCircle.BeginAnimation(Ellipse.HeightProperty, animation);
+                    
                     break;
             }
         }
 
+        public void RevertCircleSizeAndColor(object sender, EventArgs e)
+        {
+            appCircle.BeginAnimation(Ellipse.WidthProperty, null);
+            appCircle.Fill = _settings.DefaultColor;
+            appCircle.Width = _settings.FromSize;
+            appCircle.Height = _settings.FromSize;
+
+            // Create and start a motion animation for the ellipse
+            animation.From = _settings.FromSize;  // Initial size
+            animation.To = _settings.FromSize;    // Target size
+            animation.Duration = new Duration(TimeSpan.FromSeconds(0));  // Animation duration
+
+            // Set the center point for scaling (optional)
+            appCircle.RenderTransformOrigin = new Point(0.5, 0.5);
+
+            // Apply the animation to the Width and Height properties of the ellipse
+            appCircle.BeginAnimation(Ellipse.WidthProperty, animation);
+            appCircle.BeginAnimation(Ellipse.HeightProperty, animation);
+        }
+
         private void OnGlobalMouseMove(object sender, Point e)
         {
-            appCircle.Margin = new Thickness(e.X + appCircle.Width + _settings.MoveX, e.Y + appCircle.Height + _settings.MoveY, 0, 0);
+            appCircle.Margin = new Thickness(e.X + _settings.FromSize + _settings.MoveX, e.Y + _settings.FromSize + _settings.MoveY, 0, 0);
             _lastMousePosition = e;
         }
     }
